@@ -15,3 +15,4 @@ tree > structure.txt
 
 git config --global user.name "GunsPojoshe"
 git config --global user.email "simpataga17@gmail.com"
+git remote add origin https://github.com/GunsPojoshe/Project.git
