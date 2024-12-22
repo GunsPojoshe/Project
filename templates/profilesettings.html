@@ -1,0 +1,31 @@
+<!-- profilesettings.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+    <!-- Панель с ссылкой на Главную, отображается только для авторизованных пользователей -->
+    {% if session.get('user_id') %}
+    <nav class="top-nav-bar">
+        <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">Главная</a>
+        <a href="{{ url_for('sales') }}" class="{{ 'active' if request.endpoint == 'sales' else '' }}">Продажи</a>
+        <a href="{{ url_for('stock') }}" class="{{ 'active' if request.endpoint == 'stock' else '' }}">Остатки</a>
+        
+        {% if session.get('user_id') %}
+        <div class="profile-menu">
+            <div class="profile-button" id="menuButton">
+                <span class="profile-label">Учетная запись</span>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="{{ url_for('profile') }}" class="{{ 'active' if request.endpoint == 'profile' else '' }}">Профиль</a>
+                <a href="{{ url_for('profilesettings') }}" class="{{ 'active' if request.endpoint == 'profilesettings' else '' }}">Настройки профиля</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+    
+    {% endif %}
+{% endblock %}
+

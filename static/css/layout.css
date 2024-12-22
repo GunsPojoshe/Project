@@ -1,0 +1,28 @@
+/* layout.css /*
+
+/* Центрирование контейнера формы */
+.auth-form {
+    background-color: rgba(76, 80, 88, 0.9); /* Полупрозрачный темно-серый фон */
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%; /* Адаптивная ширина */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Отступы между элементами формы */
+    margin: 0; /* Убираем любые внешние отступы */
+    box-sizing: border-box;
+}
+
+/* Отступ для контента, чтобы не перекрывать его панелью */
+.main-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px; /* Внутренний отступ */
+    box-sizing: border-box; /* Учитываем отступы в ширине/высоте */
+    background-color: transparent; /* Прозрачный фон */
+    margin-top: 60px; /* Добавляем отступ сверху, чтобы панель не перекрывала контент */
+}

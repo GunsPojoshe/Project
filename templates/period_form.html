@@ -1,0 +1,11 @@
+<!-- period_form.html -->
+ 
+<form method="get" action="{{ url_for('sales') }}" class="filter-form">
+    <label for="start_date">Выберите начало периода:</label>
+    <input type="date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+
+    <label for="end_date">Выберите конец периода:</label>
+    <input type="date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+
+    <button type="submit">Применить</button>
+</form>

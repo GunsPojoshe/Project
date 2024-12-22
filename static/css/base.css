@@ -1,0 +1,16 @@
+/* base.css */
+
+/* Глобальные стили */
+body {
+    display: flex;
+    justify-content: center; /* Горизонтальное центрирование */
+    align-items: center; /* Вертикальное центрирование */
+    min-height: 100vh; /* Высота экрана */
+    margin: 0;
+    padding: 0;
+    background-color: #2f3136; /* Темный фон */
+    color: #e0e0e0; /* Светлый текст */
+    font-family: "Whitney", Arial, sans-serif; /* Шрифт */
+    text-align: center; /* Выравнивание текста */
+    overflow-x: hidden; /* Запрещаем горизонтальную прокрутку */
+}

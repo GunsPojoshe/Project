@@ -1,0 +1,36 @@
+/* animations.css */
+
+/* Стили для эффектов при наведении */
+.form-input:focus {
+    border-color: #7289da; /* Синий цвет при фокусе */
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-button:hover {
+    background-color: #5b6eae; /* Темно-синий при наведении */
+    transition: background-color 0.3s ease;
+}
+
+.nav-bar a:hover {
+    color: #7289da; /* Синий при наведении */
+    transition: color 0.3s ease;
+}
+
+.top-nav-bar a:hover {
+    background-color: rgba(255, 255, 255, 0.2); 
+    color: #ffffff; 
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3); 
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.top-nav-bar .icon:hover {
+    color: #ffcc00; /* Желтый цвет при наведении */
+    transition: color 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Подсветка при наведении на пункты меню */
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}

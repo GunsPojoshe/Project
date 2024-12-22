@@ -1,0 +1,81 @@
+/* navbar.css */
+
+/* Стили для панели навигации */
+.nav-bar {
+    background-color: #333; /* Темный фон панели */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+.nav-bar a {
+    color: #ffffff;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.nav-bar a:hover {
+    color: #7289da; /* Синий при наведении */
+}
+
+.nav-bar .active {
+    color: #7289da; /* Синий цвет для активной страницы */
+}
+
+/* Стили для панели сверху */
+.top-nav-bar {
+    background-color: rgba(60, 42, 41, 0.8); /* Цвет панели */
+    padding: 10px 15px; /* Отступы внутри панели */
+    border-radius: 10px; /* Закругление углов */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Равномерное распределение элементов */
+    position: fixed; /* Фиксация панели */
+    top: 10px; /* Отступ от верхнего края */
+    right: 20px; /* Отступ от правого края */
+    z-index: 1000; /* Приоритет отображения */
+}
+
+/* Стили для активных ссылок в верхней панели */
+.top-nav-bar a {
+    color: white; /* Белый текст */
+    text-decoration: none; /* Убираем подчеркивание */
+    font-size: 16px;
+    font-weight: bold;
+    margin: 3px;
+    padding: 8px 12px; /* Отступы внутри кнопки */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Плавный переход */
+    border-radius: 5px; /* Закругленные углы */
+}
+
+.top-nav-bar a:hover {
+    background-color: rgba(255, 255, 255, 0.2); 
+    color: #ffffff; 
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3); 
+}
+
+/* Стиль для активной ссылки */
+.top-nav-bar a.active {
+    background-color: rgba(255, 255, 255, 0.2); /* Желтый фон для активной */
+    color: #ffffff; /* Желтый текст */
+    font-weight: bold;
+}
+
+/* Стили для значков */
+.top-nav-bar .icon {
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.top-nav-bar .icon:hover {
+    color: #ffcc00; /* Желтый цвет при наведении */
+}
