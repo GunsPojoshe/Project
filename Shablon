@@ -13,6 +13,3 @@ tree > structure.txt
 
 , файлы которые я отправляю всегда имеют сверху свое название, вот к примеру так # название # или <!-- название -->. Ты проверишь код, который я отправляю, внесешь в него свои правки, и выгрузишь его полностью с твоими правками с сохранением названия файла, который мы редактируем.
 
-git config --global user.name "GunsPojoshe"
-git config --global user.email "simpataga17@gmail.com"
-git remote add origin https://github.com/GunsPojoshe/Project.git
