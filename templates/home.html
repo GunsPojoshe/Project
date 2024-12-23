@@ -5,26 +5,125 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-    <!-- Панель с ссылкой на Главную, отображается только для авторизованных пользователей -->
-    {% if session.get('user_id') %}
-    <nav class="top-nav-bar">
-        <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">Главная</a>
-        <a href="{{ url_for('sales') }}" class="{{ 'active' if request.endpoint == 'sales' else '' }}">Продажи</a>
-        <a href="{{ url_for('stock') }}" class="{{ 'active' if request.endpoint == 'stock' else '' }}">Остатки</a>
-        
-        {% if session.get('user_id') %}
-        <div class="profile-menu">
-            <div class="profile-button" id="menuButton">
-                <span class="profile-label">Учетная запись</span>
-            </div>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <a href="{{ url_for('profile') }}" class="{{ 'active' if request.endpoint == 'profile' else '' }}">Профиль</a>
-                <a href="{{ url_for('profilesettings') }}" class="{{ 'active' if request.endpoint == 'profilesettings' else '' }}">Настройки профиля</a>
-                <a href="{{ url_for('logout') }}">Выйти</a>
-            </div>
+<!-- Панель с ссылкой на Главную, отображается только для авторизованных пользователей -->
+{% if session.get('user_id') %}
+<nav class="top-nav-bar">
+    <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">Главная</a>
+    <a href="{{ url_for('sales') }}" class="{{ 'active' if request.endpoint == 'sales' else '' }}">Продажи</a>
+    <a href="{{ url_for('stock') }}" class="{{ 'active' if request.endpoint == 'stock' else '' }}">Остатки</a>
+
+    <div class="profile-menu">
+        <div class="profile-button" id="menuButton">
+            <span class="profile-label">Учетная запись</span>
         </div>
-        {% endif %}
-    </nav>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="{{ url_for('profile') }}" class="{{ 'active' if request.endpoint == 'profile' else '' }}">Профиль</a>
+            <a href="{{ url_for('profilesettings') }}" class="{{ 'active' if request.endpoint == 'profilesettings' else '' }}">Настройки профиля</a>
+            <a href="{{ url_for('logout') }}">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildberries Analytics</title>
+    <link rel="stylesheet" href="/static/css/dashboardWBOZON.css">
+</head>
+<body>
+    <div class="content">
+        <!-- Фильтры -->
+        <div class="filters">
+            <label for="begin">Начало:</label>
+            <input type="date" id="begin">
+            <label for="end">Конец:</label>
+            <input type="date" id="end">
+            <button onclick="fetchData()">Загрузить</button>
+        </div>
     
-    {% endif %}
+        <!-- Секция метрик -->
+        <section class="metrics">
+            <div class="metric-card" id="openCardCount">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Открытия карточки</p>
+            </div>
+            <div class="metric-card" id="addToCartCount">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Добавления в корзину</p>
+            </div>
+            <div class="metric-card" id="ordersCount">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Количество заказов</p>
+            </div>
+            <div class="metric-card" id="ordersSumRub">
+                <span class="difference neutral">+₽ 0</span>
+                <span class="trend neutral">0%</span>
+                <h3>₽ 0</h3>
+                <p>Сумма заказов</p>
+            </div>
+            <div class="metric-card" id="buyoutsCount">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Выкупы</p>
+            </div>
+            <div class="metric-card" id="buyoutsSumRub">
+                <span class="difference neutral">+₽ 0</span>
+                <span class="trend neutral">0%</span>
+                <h3>₽ 0</h3>
+                <p>Сумма выкупов</p>
+            </div>
+            <div class="metric-card" id="cancelCount">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Возвраты</p>
+            </div>
+            <div class="metric-card" id="cancelSumRub">
+                <span class="difference neutral">+₽ 0</span>
+                <span class="trend neutral">0%</span>
+                <h3>₽ 0</h3>
+                <p>Сумма возвратов</p>
+            </div>
+            <div class="metric-card" id="averageOrderCheck">
+                <span class="difference neutral">+₽ 0</span>
+                <span class="trend neutral">0%</span>
+                <h3>₽ 0</h3>
+                <p>Средний чек по заказам</p>
+            </div>
+            <div class="metric-card" id="averageBuyoutCheck">
+                <span class="difference neutral">+₽ 0</span>
+                <span class="trend neutral">0%</span>
+                <h3>₽ 0</h3>
+                <p>Средний чек по выкупам</p>
+            </div>
+            <div class="metric-card" id="stocksAvailable">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Доступные товары</p>
+            </div>
+            <div class="metric-card" id="stocksInTransit">
+                <span class="difference neutral">+0</span>
+                <span class="trend neutral">0%</span>
+                <h3>0</h3>
+                <p>Товары в пути</p>
+            </div>
+        </section>
+            </div>
+        <script src="/static/js/dashboardWB.js"></script>
+</body>
+</html>
+
+
+<script src="{{ url_for('static', filename='js/dashboardWB.js') }}"></script>
+{% endif %}
 {% endblock %}
+

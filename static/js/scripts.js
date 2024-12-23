@@ -40,3 +40,4 @@ document.addEventListener("DOMContentLoaded", function () {
         toggleMethod.addEventListener("change", toggleVisibility);
     }
 });
+

@@ -8,13 +8,20 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from flask_socketio import SocketIO
+from wildberries_api.api_wildberries import register_wildberries_routes
 
 # Инициализация приложения
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 
+# Инициализация SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Конфигурация для двух баз данных
+# Подключение маршрутов Wildberries
+register_wildberries_routes(app, socketio)
+
+# Конфигурация для двух баз данных sales_funnel тестовый и users
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app.config['SQLALCHEMY_BINDS'] = {
@@ -233,8 +240,5 @@ def stock():
     return render_template("stock.html")
 
 if __name__ == "__main__":
-    
-    app.run(debug=True)
-
-
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
 

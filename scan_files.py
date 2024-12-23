@@ -1,4 +1,5 @@
 import os
+import zipfile
 
 def write_project_overview(output_file):
     """
@@ -30,19 +31,21 @@ def write_project_overview(output_file):
     with open(output_file, 'a', encoding='utf-8') as out:
         out.write(overview_text + "\n\n" + "=" * 50 + "\n\n")
 
-def list_core_app_files(base_path, extensions, output_file, max_files=100):
+def list_core_app_files(base_path, extensions, output_file, max_files=100, exclude_dirs=None):
     """
     Рекурсивно обходит директорию core_app, записывает пути файлов и их содержимое в файл.
-    Ограничивает количество файлов для обработки.
-    :param base_path: Директория core_app.
-    :param extensions: Список разрешённых расширений файлов.
-    :param output_file: Файл для записи результата.
-    :param max_files: Максимальное количество файлов для обработки.
+    Исключает определённые директории.
     """
+    if exclude_dirs is None:
+        exclude_dirs = ['venv', '__pycache__', '.git']
+
     file_count = 0
     with open(output_file, 'a', encoding='utf-8') as out:
         out.write("Содержимое файлов в директории core_app:\n\n")
-        for root, _, files in os.walk(base_path):
+        for root, dirs, files in os.walk(base_path):
+            # Исключение директорий
+            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+
             for file in files:
                 if file_count >= max_files:
                     out.write(f"Обработка остановлена: достигнуто максимальное количество файлов ({max_files}).\n")
@@ -84,27 +87,42 @@ def write_final_message(output_file):
     with open(output_file, 'a', encoding='utf-8') as out:
         out.write(final_message + "\n")
 
-def split_output_into_files_by_size(base_filename, content, max_size=3000):
+def split_output_into_files_and_zip(base_filename, content, max_lines=3000, zip_filename="output_files.zip"):
     """
-    Разделяет контент на несколько файлов, если он превышает лимит размера.
+    Разделяет текстовый контент на несколько файлов, если он превышает лимит строк, и архивирует их.
     :param base_filename: Базовое имя файла.
     :param content: Текстовый контент для разделения.
-    :param max_size: Максимальный размер файла в символах.
+    :param max_lines: Максимальное количество строк в одном файле.
+    :param zip_filename: Имя ZIP-архива для созданных файлов.
     """
+    lines = content.splitlines()  # Разделение текста на строки
     file_count = 1  # Счетчик для имен файлов
-    while content:
-        # Извлекаем часть текста
-        part = content[:max_size]
-        content = content[max_size:]  # Оставшийся текст
-        filename = f"{base_filename}_{file_count}.txt"
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(part)
-        print(f"Создан файл: {filename} с размером {len(part)} символов.")
-        file_count += 1
-        # Ограничение на количество создаваемых файлов
-        if file_count > 100:  # Лимит для предотвращения ошибок
-            print("Превышено максимальное количество файлов! Прерывание.")
-            break
+
+    with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for i in range(0, len(lines), max_lines):
+            # Извлекаем блок строк
+            part = "\n".join(lines[i:i + max_lines])
+            filename = f"{base_filename}_{file_count}.txt"
+            
+            # Создаём временный файл
+            with open(filename, 'w', encoding='utf-8') as f:
+                f.write(part)
+
+            # Добавляем файл в архив
+            zipf.write(filename, arcname=os.path.basename(filename))
+            print(f"Добавлено в архив: {filename} ({len(part.splitlines())} строк).")
+            
+            # Удаляем временный файл после добавления в архив
+            os.remove(filename)
+            
+            file_count += 1
+            
+            # Ограничение на количество создаваемых файлов
+            if file_count > 100:  # Лимит для предотвращения ошибок
+                print("Превышено максимальное количество файлов! Прерывание.")
+                break
+
+    print(f"Архив создан: {zip_filename}")
 
 if __name__ == "__main__":
     # Путь к папке core_app и файлы для анализа
@@ -136,5 +154,5 @@ if __name__ == "__main__":
     with open(base_output_file + "_1.txt", 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Разделяем контент на несколько частей по 3000 символов
-    split_output_into_files_by_size(base_output_file, content, max_size=3000)
+# Разделяем контент на части по 10000 строк и архивируем их
+split_output_into_files_and_zip(base_output_file, content, max_lines=3000, zip_filename="output_files.zip")
