@@ -20,50 +20,9 @@
                 <a href="{{ url_for('profilesettings') }}" class="{{ 'active' if request.endpoint == 'profilesettings' else '' }}">Настройки профиля</a>
                 <a href="{{ url_for('logout') }}">Выйти</a>
             </div>
+        
         </div>
     </nav>
-
-    <!-- Выпадающее меню для переключения видимости колонок -->
-    <div class="column-toggle-menu">
-        <button class="toggle-menu-button">Управление колонками</button>
-        <div class="dropdown-column-menu">
-            {% for col in columns %}
-            <label>
-                <input type="checkbox" class="column-toggle" data-column="{{ loop.index0 }}" checked>
-                {{ col }}
-            </label>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Обёртка для таблицы -->
-    <div class="table-wrapper" id="tableWrapper">
-        <table class="sales-table">
-            <thead>
-                <tr>
-                    {% for col in columns %}
-                    <th>
-                        <span class="column-title" data-column="{{ loop.index0 }}">{{ col }}</span>
-                        <button class="edit-column-btn" data-column="{{ loop.index0 }}">✏️</button>
-                    </th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in sales_data %}
-                <tr>
-                    {% for col in columns %}
-                    <td>{{ item[col] }}</td>
-                    {% endfor %}
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="{{ columns|length }}">Данные отсутствуют</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
     {% endif %}
 {% endblock %}
 

@@ -1,4 +1,4 @@
-// dashboard.js
+// dashboardWB.js
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('data-container');
     const metricElements = {
@@ -230,3 +230,5 @@ function getDragAfterElement(container, y) {
         { offset: Number.NEGATIVE_INFINITY }
     ).element;
 }
+
+//Запоминай и жди следующий файл

@@ -4,10 +4,14 @@ from flask_socketio import emit
 import requests
 import time
 from datetime import datetime, timedelta
+from models import WBstocks
+
 
 API_TOKEN = "eyJhbGciOiJFUzI1NiIsImtpZCI6IjIwMjQxMTE4djEiLCJ0eXAiOiJKV1QifQ.eyJlbnQiOjEsImV4cCI6MTc0Nzk0OTkwMCwiaWQiOiIwMTkzNGUxNi0zZTM1LTcwN2QtOTkzYi04YTQ4NjgyMzdkYzciLCJpaWQiOjI1Mzk4OTI2LCJvaWQiOjM5MjU4MDksInMiOjEwNzM3NDk3NTgsInNpZCI6IjhjYmQ5NWM1LTcxYTItNGZkMS1iNGEzLWFmN2EyYjA1OTBhOSIsInQiOmZhbHNlLCJ1aWQiOjI1Mzk4OTI2fQ.wKbTKUOXoIWLvoqChuyCCXNb2OzYwzup1U3E2qhSFI9wpsy7IBtE9CeTwWX7RmjJeH29PE7S3-OeW5lY3B3duA"
 API_URL = "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/grouped"
 API_STOCKS_URL = "https://statistics-api.wildberries.ru/api/v1/supplier/stocks"
+
+
 
 def register_wildberries_routes(app, socketio):
     @app.route("/api/data", methods=["POST"])
@@ -110,16 +114,33 @@ def register_wildberries_routes(app, socketio):
 
             stock_data = response.json()
             stocks_metrics = {
-                "stocksAvailable": sum(item.get("quantity", 0) for item in stock_data),
-                "stocksInTransit": sum(item.get("inWayToClient", 0) for item in stock_data),
-                "stocksReserved": sum(item.get("stocksReserved", 0) for item in stock_data),
-                "stocksUnavailable": sum(item.get("stocksUnavailable", 0) for item in stock_data)
+                "date": today,
+                "stocks_available": sum(item.get("quantity", 0) for item in stock_data),
+                "stocks_in_transit": sum(item.get("inWayToClient", 0) for item in stock_data),
+                "stocks_reserved": sum(item.get("stocksReserved", 0) for item in stock_data),
+                "stocks_unavailable": sum(item.get("stocksUnavailable", 0) for item in stock_data),
             }
+
+            # Проверяем, есть ли данные для этой даты в новой базе
+            existing_stock = WBstocks.query.filter_by(date=today).first()
+            if not existing_stock:
+                # Сохраняем новые данные в новую базу
+                new_stock = Stock(
+                    date=stocks_metrics["date"],
+                    stocks_available=stocks_metrics["stocks_available"],
+                    stocks_in_transit=stocks_metrics["stocks_in_transit"],
+                    stocks_reserved=stocks_metrics["stocks_reserved"],
+                    stocks_unavailable=stocks_metrics["stocks_unavailable"]
+                )
+                db.session.add(new_stock)
+                db.session.commit()
 
             return jsonify(stocks_metrics)
         except Exception as e:
             return jsonify({"error": f"Произошла ошибка: {str(e)}"}), 500
 
-def emit_progress(socketio, processed, total, message):
-    progress = (processed / total) * 100
-    socketio.emit("progress", {"progress": progress, "message": message}, to=None)
+    def emit_progress(socketio, processed, total, message):
+        progress = (processed / total) * 100
+        socketio.emit("progress", {"progress": progress, "message": message}, to=None)
+
+#Запоминай и жди следующий файл

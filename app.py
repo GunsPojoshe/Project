@@ -10,6 +10,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from flask_socketio import SocketIO
 from wildberries_api.api_wildberries import register_wildberries_routes
+from models import db, WBstocks, WBsales, User
+from sqlalchemy import text
 
 # Инициализация приложения
 app = Flask(__name__)
@@ -18,50 +20,16 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 # Инициализация SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Подключение маршрутов Wildberries
-register_wildberries_routes(app, socketio)
-
-# Конфигурация для двух баз данных sales_funnel тестовый и users
+# Конфигурация базы данных Main.db
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-app.config['SQLALCHEMY_BINDS'] = {
-    'users': 'sqlite:///' + os.path.join(basedir, 'instance', 'users.db'),
-    'sales_funnel': 'sqlite:///' + os.path.join(basedir, 'instance', 'sales_funnel.db')
-}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'Main.db')
 
 # Инициализация базы данных и миграций
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)  # Настройка миграций
+db.init_app(app)
+migrate = Migrate(app, db)
 
-# Модель пользователя
-class User(db.Model):
-    __bind_key__ = 'users'  # Привязка к базе данных users.db
-    __tablename__ = 'users'  # Указываем имя таблицы явно
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-
-
-# Создание таблиц в базах данных
-with app.app_context():
-    # Создаём таблицы для базы данных users.db
-    db.metadata.create_all(bind=db.engines['users'])
-
-    # Создаём таблицы для базы данных sales_funnel.db
-    db.metadata.create_all(bind=db.engines['sales_funnel'])
-
-    print(app.url_map)
-
-    # Модель для хранения пользовательских названий колонок sales_funnel
-class ColumnName(db.Model):
-    __bind_key__ = 'sales_funnel'
-    __tablename__ = 'column_names'
-    id = db.Column(db.Integer, primary_key=True)
-    column_key = db.Column(db.String(150), unique=True, nullable=False)
-    column_name = db.Column(db.String(150), nullable=False)
-
-
-
+# Регистрация маршрутов Wildberries
+register_wildberries_routes(app, socketio)
 # Форма регистрации
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[
@@ -97,7 +65,7 @@ def home():
                 flash("Неправильное имя пользователя или пароль.", "danger")
         return render_template("login.html", form=form)
 
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     return render_template("home.html", user=user)
 
 # Логин
@@ -171,73 +139,32 @@ def logout():
 # Продажи
 @app.route("/sales", methods=["GET", "POST"])
 def sales():
-    import sqlite3
-    import pandas as pd
-
-    db_path = "instance/sales_funnel.db"
-    start_date = request.args.get('start_date', '')
-    end_date = request.args.get('end_date', '')
-
-    # Строим запрос с фильтрацией по датам
-    query = "SELECT * FROM sales_funnel"
-    conditions = []
-
-    # Добавляем условия для фильтрации по дате
-    if start_date:
-        conditions.append(f"start_date >= '{start_date}'")
-    if end_date:
-        conditions.append(f"end_date <= '{end_date}'")
-
-    # Если есть условия, добавляем их в запрос
-    if conditions:
-        query += " WHERE " + " AND ".join(conditions)
-
-    # Отладка: выводим сформированный запрос
-    print("Сформированный запрос:", query)
-
-    # Выполняем запрос
-    conn = sqlite3.connect(db_path)
-    sales_data = pd.read_sql(query, conn)
-    conn.close()
-
-    # Преобразуем данные в список словарей
-    sales_data = sales_data.to_dict(orient="records")
-    columns = sales_data[0].keys() if sales_data else []
-
-    return render_template("sales.html", sales_data=sales_data, columns=columns)
-
-# API для работы с названиями колонок sales_funnel
-@app.route("/api/columns", methods=["POST", "GET"])
-def manage_columns():
-    if request.method == "POST":
-        data = request.json
-        column_key = data.get("column_key")
-        column_name = data.get("column_name")
-
-        if not column_key or not column_name:
-            print("Invalid data received:", data)
-            return jsonify({"error": "Invalid data"}), 400
-
-        column = ColumnName.query.filter_by(column_key=column_key).first()
-        if column:
-            column.column_name = column_name
-        else:
-            column = ColumnName(column_key=column_key, column_name=column_name)
-            db.session.add(column)
-        db.session.commit()
-        return jsonify({"success": True})
-
-    elif request.method == "GET":
-        columns = ColumnName.query.all()
-        print("Отладка: данные из базы column_names:")
-        for col in columns:
-            print(f"ID: {col.id}, Key: {col.column_key}, Name: {col.column_name}")
-        return jsonify({col.column_key: col.column_name for col in columns})
+    return render_template("sales.html")
 
 # Остатки
 @app.route("/stock")
 def stock():
     return render_template("stock.html")
+
+@app.route("/debug/stocks", methods=["GET"])
+def debug_stocks():
+    try:
+        stocks = Stock.query.all()
+        stock_list = [
+            {
+                "id": stock.id,
+                "date": stock.date.strftime("%Y-%m-%d"),
+                "stocks_available": stock.stocks_available,
+                "stocks_in_transit": stock.stocks_in_transit,
+                "stocks_reserved": stock.stocks_reserved,
+                "stocks_unavailable": stock.stocks_unavailable,
+            }
+            for stock in stocks
+        ]
+        return jsonify(stock_list)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000, debug=True)
